@@ -3,6 +3,7 @@ class_name Player
 
 var id
 var color: Color setget set_color
+var health = 1.0
 
 func _ready():
 	rset_config("position", MultiplayerAPI.RPC_MODE_REMOTESYNC)
@@ -17,7 +18,7 @@ func _ready():
 
 func get_sync_state():
 	# place all synced properties in here
-	var properties = ['color']
+	var properties = ['color', 'health']
 	
 	var state = {}
 	for p in properties:

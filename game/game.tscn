@@ -72,3 +72,22 @@ shape = SubResource( 2 )
 [node name="MeshInstance2D" type="MeshInstance2D" parent="StaticBody2D3"]
 scale = Vector2( 20, 20 )
 mesh = SubResource( 3 )
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HealthbarBackground" type="ColorRect" parent="CanvasLayer"]
+margin_left = -106.0
+margin_top = 448.0
+margin_right = 64.0
+margin_bottom = 488.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Healthbar" type="ColorRect" parent="CanvasLayer/HealthbarBackground"]
+margin_right = 170.0
+margin_bottom = 40.0
+color = Color( 0.286275, 1, 0.027451, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
