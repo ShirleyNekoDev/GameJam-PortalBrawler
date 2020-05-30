@@ -32,7 +32,7 @@ func _process(delta):
 		if Input.is_action_just_pressed("ui_accept"):
 			rpc("spawn_box", position)
 		if Input.is_mouse_button_pressed(BUTTON_LEFT):
-			var direction = -(position - get_viewport().get_mouse_position()).normalized()
+			var direction = -(get_viewport().size / 2 - get_viewport().get_mouse_position()).normalized()
 			rpc("spawn_projectile", position, direction, Uuid.v4())
 		
 		do_movement(delta)
