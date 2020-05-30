@@ -5,6 +5,8 @@ var id
 var color: Color setget set_color
 var health = 1.0
 
+signal health_changed(new_health)
+
 func _ready():
 	rset_config("position", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	set_process(true)
@@ -111,6 +113,15 @@ remotesync func spawn_box(position):
 	var box = preload("res://examples/block/block.tscn").instance()
 	box.position = position
 	get_parent().add_child(box)
+	
+remotesync func hit(element: Node):
+	print("health loss")
+	if element.is_in_group("projectiles"):
+		health -= element.get_damage()
+		emit_signal("health_changed", health)
+		element.queue_free()
+		if health <= 0:
+			pass
 
 remotesync func kill():
 	hide()

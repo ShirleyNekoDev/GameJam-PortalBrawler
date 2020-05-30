@@ -5,7 +5,9 @@
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 7.2503, 6.93612 )
 
-[node name="physics_projectile" type="RigidBody2D"]
+[node name="physics_projectile" type="RigidBody2D" groups=[
+"projectiles",
+]]
 contacts_reported = 1
 contact_monitor = true
 script = ExtResource( 1 )

@@ -37,8 +37,8 @@ func _integrate_forces(state: Physics2DDirectBodyState):
 		for i in range(state.get_contact_count()):
 			var body = state.get_contact_collider_object(i)
 			if body and body != owned_by and body.is_in_group("players"):
-				body.rpc("kill")
-	#elif has_overrides:
+				body.rpc("hit", self)
+	#elif has_overrides:, 
 	#	has_overrides = false
 	#	state.transform = Transform2D(override_rotation, override_position)
 	#	state.angular_velocity = override_angular_velocity

@@ -70,6 +70,7 @@ remote func register_player(player_id: int, position, state: Dictionary):
 	player.add_to_group("players")
 	
 	add_child(player)
+	player.connect("health_changed", self, "update_health")
 	
 	if position:
 		player.position = position
@@ -79,3 +80,7 @@ remote func register_player(player_id: int, position, state: Dictionary):
 
 remotesync func unregister_player(player_id: int):
 	remove_child(get_node(String(player_id)))
+	
+func update_health(health):
+	if health >= 0:
+		$CanvasLayer/HealthbarBackground/Healthbar.rect_scale = Vector2(health, 1)

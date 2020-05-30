@@ -41,6 +41,7 @@ position = Vector2( 436.444, 270.096 )
 position = Vector2( 453.054, 573.523 )
 rotation = 1.49577
 scale = Vector2( 0.497915, 44.0733 )
+collision_layer = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
 shape = SubResource( 2 )
@@ -53,6 +54,7 @@ mesh = SubResource( 3 )
 position = Vector2( 994.106, 407.207 )
 rotation = -0.036454
 scale = Vector2( 0.497915, 44.0733 )
+collision_layer = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D2"]
 shape = SubResource( 2 )
@@ -65,6 +67,7 @@ mesh = SubResource( 3 )
 position = Vector2( 30.9485, 378.786 )
 rotation = -0.036454
 scale = Vector2( 0.497915, 44.0733 )
+collision_layer = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D3"]
 shape = SubResource( 2 )
@@ -76,10 +79,11 @@ mesh = SubResource( 3 )
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="HealthbarBackground" type="ColorRect" parent="CanvasLayer"]
-margin_left = -106.0
-margin_top = 448.0
-margin_right = 64.0
-margin_bottom = 488.0
+margin_left = 20.0
+margin_top = 20.0
+margin_right = 190.0
+margin_bottom = 60.0
+rect_scale = Vector2( 1.28125, 0.857143 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

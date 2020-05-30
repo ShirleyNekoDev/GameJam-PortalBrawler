@@ -6,6 +6,7 @@
 extents = Vector2( 7.2503, 6.93612 )
 
 [node name="projectile" type="Area2D"]
+collision_layer = 2
 script = ExtResource( 1 )
 
 [node name="ColorRect" type="ColorRect" parent="."]
