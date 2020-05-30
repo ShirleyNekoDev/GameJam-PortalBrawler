@@ -1,7 +1,7 @@
 extends KinematicBody2D
 class_name Player
 
-const spawn = Vector2(500, 250)
+const spawn = Vector2(200, -50)
 
 var id
 var color: Color setget set_color
@@ -187,15 +187,17 @@ remotesync func spawn_box(position):
 	box.position = position
 	get_parent().add_child(box)
 	
-remotesync func hit(element: Node):
-	print("health loss")
+remotesync func damage(element: Node):
+	print("got damaged")
 	if element.is_in_group("projectiles"):
 		health -= element.get_damage()
 		emit_signal("health_changed", health)
-		element.queue_free()
 		if health <= 0:
-			pass
-			
+			die(element)
+
+remotesync func die(killer_element: Node):
+	pass
+
 remotesync func die_and_respawn(player: Player):
 	if (player == self):
 		print("Player died")

@@ -20,7 +20,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="multiplayer"
+config/name="PortalBrawler"
 run/main_scene="res://game/game.tscn"
 config/icon="res://icon.png"
 
@@ -62,7 +62,9 @@ action_down={
 
 [physics]
 
-2d/default_gravity=0
+2d/physics_engine="GodotPhysics"
+2d/thread_model=2
+2d/default_gravity=10
 
 [rendering]
 

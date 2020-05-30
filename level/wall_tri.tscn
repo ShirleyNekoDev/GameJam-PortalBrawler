@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=2]
+
+[sub_resource type="ConvexPolygonShape2D" id=1]
+points = PoolVector2Array( -1, -1, 1, -1, 1, 1 )
+
+[sub_resource type="PrismMesh" id=2]
+left_to_right = 1.0
+
+[node name="Wall_Tri" type="StaticBody2D"]
+rotation = 3.14159
+collision_layer = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 1 )
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="."]
+mesh = SubResource( 2 )
