@@ -42,10 +42,10 @@ func _process(delta):
 const gravity_acceleration = 2000
 const max_speed = 1000
 const speed = 350
-const air_acceleration = 200
-const wall_jump_speed = 200
+const air_acceleration = 50
+const jump_speed_side = 300
 const wall_sliding_speed = 150
-const jump_power = -1000
+const jump_power = -800
 
 var velocity = Vector2(0, 0)
 var jump_allowed = 2
@@ -54,7 +54,7 @@ var dropping = false
 var time_since_contact = 0
 var time_since_jump = 0
 const jump_grace_period_in_seconds = 0.1
-const jump_lockout_period_in_seconds = 0.2
+const jump_lockout_period_in_seconds = 0.1
 
 enum Move {
 	LEFT,
@@ -78,18 +78,19 @@ func do_movement(delta):
 			move = Move.NOT
 		if Input.is_action_just_pressed("action_down"):
 			move = Move.DROP
-		jump = Input.is_action_pressed("action_jump")
+			
+	jump = Input.is_action_just_pressed("action_jump")
 		
 	if move == Move.LEFT && !dropping:
 		if is_on_floor():
 			velocity.x = min(velocity.x, -speed)
 		else:
-			velocity.x = min(0, velocity.x - air_acceleration * delta)
+			velocity.x = max(velocity.x - air_acceleration, -speed)
 	elif move == Move.RIGHT && !dropping:
 		if is_on_floor():
 			velocity.x = max(velocity.x, speed)
 		else:
-			velocity.x = max(0, velocity.x + air_acceleration * delta)
+			velocity.x = min(velocity.x + air_acceleration, speed)
 	elif move == Move.NOT:
 		if is_on_floor():
 			velocity.x = 0
@@ -126,19 +127,23 @@ func do_movement(delta):
 			if jump:
 				var side = get_colliding_wall()
 				if side == Wall.LEFT:
-					velocity.x = wall_jump_speed
+					velocity.x = jump_speed_side + speed
 					print("left wall -> ", velocity)
 				else:
-					velocity.x = -wall_jump_speed
+					velocity.x = -(jump_speed_side + speed)
 					print("right wall -> ", velocity)
 				velocity.y = jump_power
 				jump_allowed -=1
 				time_since_jump = 0
 	elif jump && jump_allowed:
+		var side = get_colliding_wall()
+		if move == Move.LEFT:
+			velocity.x -= jump_speed_side
+		if move == Move.RIGHT:
+			velocity.x += jump_speed_side
 		velocity.y = jump_power
 		jump_allowed -=1
 		time_since_jump = 0
-		time_since_contact = jump_grace_period_in_seconds
 	
 	$Camera2D/is_jump_allowed.color = Color.red if jump_allowed else Color.white
 	$Camera2D/is_drop_allowed.color = Color.red if dropping else Color.white
