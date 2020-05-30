@@ -1,11 +1,16 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://game/game.gd" type="Script" id=1]
 [ext_resource path="res://sync/sync.tscn" type="PackedScene" id=2]
 [ext_resource path="res://sync/syncable_rigid_body.gd" type="Script" id=3]
+[ext_resource path="res://examples/block/block.tscn" type="PackedScene" id=4]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 19.4735, 20.0481 )
+
+[sub_resource type="RectangleShape2D" id=2]
+
+[sub_resource type="QuadMesh" id=3]
 
 [node name="game" type="Node2D"]
 script = ExtResource( 1 )
@@ -28,3 +33,42 @@ shape = SubResource( 1 )
 
 [node name="sync" parent="RigidBody2D" instance=ExtResource( 2 )]
 synced_properties = PoolStringArray( "rotation", "linear_velocity", "angular_velocity" )
+
+[node name="block" parent="." instance=ExtResource( 4 )]
+position = Vector2( 436.444, 270.096 )
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+position = Vector2( 453.054, 573.523 )
+rotation = 1.49577
+scale = Vector2( 0.497915, 44.0733 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+shape = SubResource( 2 )
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="StaticBody2D"]
+scale = Vector2( 20, 20 )
+mesh = SubResource( 3 )
+
+[node name="StaticBody2D2" type="StaticBody2D" parent="."]
+position = Vector2( 994.106, 407.207 )
+rotation = -0.036454
+scale = Vector2( 0.497915, 44.0733 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D2"]
+shape = SubResource( 2 )
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="StaticBody2D2"]
+scale = Vector2( 20, 20 )
+mesh = SubResource( 3 )
+
+[node name="StaticBody2D3" type="StaticBody2D" parent="."]
+position = Vector2( 30.9485, 378.786 )
+rotation = -0.036454
+scale = Vector2( 0.497915, 44.0733 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D3"]
+shape = SubResource( 2 )
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="StaticBody2D3"]
+scale = Vector2( 20, 20 )
+mesh = SubResource( 3 )
