@@ -22,6 +22,7 @@ shape = SubResource( 1 )
 current = true
 
 [node name="is_jump_allowed" type="ColorRect" parent="Camera2D"]
+visible = false
 margin_left = 17.9917
 margin_top = -32.8991
 margin_right = 38.9917
@@ -30,7 +31,8 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="is_on_ground" type="ColorRect" parent="Camera2D"]
+[node name="is_touching" type="ColorRect" parent="Camera2D"]
+visible = false
 margin_left = -6.81115
 margin_top = -33.4132
 margin_right = 6.18885
@@ -39,11 +41,26 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="is_on_wall" type="ColorRect" parent="Camera2D"]
+[node name="is_drop_allowed" type="ColorRect" parent="Camera2D"]
+visible = false
 margin_left = -34.0926
 margin_top = -33.8627
 margin_right = -19.0926
 margin_bottom = -17.8627
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="name" type="Label" parent="."]
+visible = false
+margin_left = -19.6842
+margin_top = -2.10535
+margin_right = 32.3158
+margin_bottom = 11.8947
+grow_horizontal = 2
+text = "<name>"
+align = 1
+valign = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }

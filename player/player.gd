@@ -1,6 +1,8 @@
 extends KinematicBody2D
 class_name Player
 
+const spawn = Vector2(500, 250)
+
 var id
 var color: Color setget set_color
 var health = 1.0
@@ -11,7 +13,7 @@ func _ready():
 	rset_config("position", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	set_process(true)
 	randomize()
-	position = Vector2(rand_range(0, get_viewport_rect().size.x), rand_range(0, get_viewport_rect().size.y))
+	position = spawn
 	
 	
 	# pick our color, even though this will be called on all clients, everyone
@@ -37,63 +39,122 @@ func _process(delta):
 		
 		do_movement(delta)
 
-const gravity_acceleration = 20
+const gravity_acceleration = 2000
+const max_speed = 1000
+const speed = 350
+const air_acceleration = 200
+const wall_jump_speed = 200
+const wall_sliding_speed = 150
+const jump_power = -700
+
 var velocity = Vector2(0, 0)
-const max_speed = 200
 var jump_allowed = false
-const jump_power = 1400
+var want_to_jump = false
+var dropping = false
 
 var time_since_contact = 0
 const jump_grace_period_in_seconds = 0.1
 
-enum {
-	MOVE_LEFT,
-	MOVE_RIGHT,
-	MOVE_NOT
+enum Move {
+	LEFT,
+	RIGHT,
+	DROP,
+	NOT
 }
 
 func do_movement(delta):
 	time_since_contact += delta
-	
 	jump_allowed = false
-	var move = MOVE_NOT
+#	
+	var move = Move.NOT
 	if Input.is_action_pressed("action_left"):
-		move = MOVE_LEFT
+		move = Move.LEFT
 	if Input.is_action_pressed("action_right"):
-		move = MOVE_RIGHT
+		move = Move.RIGHT
 	if Input.is_action_pressed("action_left") && Input.is_action_pressed("action_right"):
-		move = MOVE_NOT
+		move = Move.NOT
+	if Input.is_action_just_pressed("action_down"):
+		move = Move.DROP
 	
 	var jump = Input.is_action_just_pressed("action_jump")
+	want_to_jump = want_to_jump || jump
 	
-	if move == MOVE_LEFT:
-		velocity.x = -max_speed
-	elif move == MOVE_RIGHT:
-		velocity.x = max_speed
-	elif move == MOVE_NOT:
+	if move == Move.LEFT && !dropping:
+		if is_on_floor():
+			velocity.x = min(velocity.x, -speed)
+		else:
+			velocity.x = min(0, velocity.x - air_acceleration * delta)
+	elif move == Move.RIGHT && !dropping:
+		if is_on_floor():
+			velocity.x = max(velocity.x, speed)
+		else:
+			velocity.x = max(0, velocity.x + air_acceleration * delta)
+	elif move == Move.NOT:
+		if is_on_floor():
+			velocity.x = 0
+	elif move == Move.DROP && !is_on_floor():
 		velocity.x = 0
+		velocity.y -= jump_power
+		dropping = true
 	
 	if is_on_floor():
 		velocity.y = 0
 		time_since_contact = 0
+		dropping = false
+		if abs(velocity.x) > speed:
+			var slowing = (abs(velocity.x) - speed) * 2 * delta
+			print(velocity.x, " ", speed, " ", slowing)
+			velocity.x -= slowing
 	else:
-		velocity = velocity + Vector2(0, gravity_acceleration)
-	
-	if is_on_wall():
-		time_since_contact = 0
+		# gravity
+		velocity.y += gravity_acceleration * delta
 	
 	if time_since_contact < jump_grace_period_in_seconds:
 		jump_allowed = true
 	
-	if jump && jump_allowed:
-		velocity.y -= jump_power
+	if is_on_ceiling():
+		velocity.y = max(0, velocity.y)
+	
+	if is_on_wall():
+		time_since_contact = 0
+		if !dropping:
+			velocity.y = wall_sliding_speed
+			if jump:
+				var side = get_colliding_wall()
+				if side == Wall.LEFT:
+					velocity.x = wall_jump_speed
+					print("left wall -> ", velocity)
+				else:
+					velocity.x = -wall_jump_speed
+					print("right wall -> ", velocity)
+				velocity.y += jump_power
+	elif want_to_jump && jump_allowed:
+		velocity.y += jump_power
+		want_to_jump = false
 		time_since_contact = jump_grace_period_in_seconds
 	
 	$Camera2D/is_jump_allowed.color = Color.red if jump_allowed else Color.white
-	$Camera2D/is_on_ground.color = Color.red if time_since_contact < jump_grace_period_in_seconds else Color.white
+	$Camera2D/is_drop_allowed.color = Color.red if dropping else Color.white
+	$Camera2D/is_touching.color = Color.red if time_since_contact < jump_grace_period_in_seconds else Color.white
+	
+	if velocity.length() > max_speed:
+		velocity = velocity.normalized() * max_speed
 	
 	move_and_slide(velocity, Vector2(0, -1))
 	rset_unreliable("position", position)
+
+enum Wall {
+	LEFT,
+	RIGHT
+}
+
+func get_colliding_wall():
+	for i in range(get_slide_count()):
+		var collision = get_slide_collision(i)
+		if collision.normal.x > 0:
+			return Wall.LEFT
+		elif collision.normal.x < 0:
+			return Wall.RIGHT
 
 func set_color(_color: Color):
 	color = _color
@@ -124,11 +185,10 @@ remotesync func hit(element: Node):
 			pass
 			
 remotesync func die_and_respawn(player: Player):
-	print("Dieeee")
 	if (player == self):
-		print("Die")
+		print("Player died")
 		health = 1.0
-		position = Vector2(100, 0)
+		position = spawn
 		velocity = Vector2(0, 0)
 		rset_unreliable("position", position)
 

@@ -41,8 +41,8 @@ synced_properties = PoolStringArray( "rotation", "linear_velocity", "angular_vel
 position = Vector2( 436.444, 270.096 )
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
-position = Vector2( 453.054, 573.523 )
-rotation = 1.49577
+position = Vector2( 435.436, 570.586 )
+rotation = 1.5708
 scale = Vector2( 0.497915, 44.0733 )
 collision_layer = 3
 
@@ -53,9 +53,44 @@ shape = SubResource( 2 )
 scale = Vector2( 20, 20 )
 mesh = SubResource( 3 )
 
+[node name="StaticBody2D5" type="StaticBody2D" parent="."]
+position = Vector2( 569.849, 334.876 )
+rotation = 1.5708
+scale = Vector2( 0.497915, 13.3533 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D5"]
+shape = SubResource( 2 )
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="StaticBody2D5"]
+scale = Vector2( 20, 20 )
+mesh = SubResource( 3 )
+
+[node name="StaticBody2D6" type="StaticBody2D" parent="."]
+position = Vector2( 154.921, -78.104 )
+rotation = 1.5708
+scale = Vector2( 0.497915, 13.3533 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D6"]
+shape = SubResource( 2 )
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="StaticBody2D6"]
+scale = Vector2( 20, 20 )
+mesh = SubResource( 3 )
+
+[node name="StaticBody2D4" type="StaticBody2D" parent="."]
+position = Vector2( 8980.48, -130.553 )
+rotation = 1.5708
+scale = Vector2( 1, 800 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D4"]
+shape = SubResource( 2 )
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="StaticBody2D4"]
+scale = Vector2( 20, 20 )
+mesh = SubResource( 3 )
+
 [node name="StaticBody2D2" type="StaticBody2D" parent="."]
-position = Vector2( 994.106, 407.207 )
-rotation = -0.036454
+position = Vector2( 972.679, 276.69 )
 scale = Vector2( 0.497915, 44.0733 )
 collision_layer = 3
 
@@ -67,8 +102,7 @@ scale = Vector2( 20, 20 )
 mesh = SubResource( 3 )
 
 [node name="StaticBody2D3" type="StaticBody2D" parent="."]
-position = Vector2( 30.9485, 378.786 )
-rotation = -0.036454
+position = Vector2( 21.2086, 363.202 )
 scale = Vector2( 0.497915, 44.0733 )
 collision_layer = 3
 
