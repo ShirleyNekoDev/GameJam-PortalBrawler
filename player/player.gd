@@ -49,11 +49,12 @@ const jump_power = -700
 
 var velocity = Vector2(0, 0)
 var jump_allowed = false
-var want_to_jump = false
 var dropping = false
 
 var time_since_contact = 0
+var time_since_jump = 0
 const jump_grace_period_in_seconds = 0.1
+const jump_lockout_period_in_seconds = 0.2
 
 enum Move {
 	LEFT,
@@ -67,18 +68,19 @@ func do_movement(delta):
 	jump_allowed = false
 #	
 	var move = Move.NOT
-	if Input.is_action_pressed("action_left"):
-		move = Move.LEFT
-	if Input.is_action_pressed("action_right"):
-		move = Move.RIGHT
-	if Input.is_action_pressed("action_left") && Input.is_action_pressed("action_right"):
-		move = Move.NOT
-	if Input.is_action_just_pressed("action_down"):
-		move = Move.DROP
 	
-	var jump = Input.is_action_just_pressed("action_jump")
-	want_to_jump = want_to_jump || jump
+	if time_since_contact > jump_lockout_period_in_seconds || is_on_floor() || is_on_wall():
+		if Input.is_action_pressed("action_left"):
+			move = Move.LEFT
+		if Input.is_action_pressed("action_right"):
+			move = Move.RIGHT
+		if Input.is_action_pressed("action_left") && Input.is_action_pressed("action_right"):
+			move = Move.NOT
+		if Input.is_action_just_pressed("action_down"):
+			move = Move.DROP
 	
+	var jump = Input.is_action_pressed("action_jump")
+		
 	if move == Move.LEFT && !dropping:
 		if is_on_floor():
 			velocity.x = min(velocity.x, -speed)
@@ -128,9 +130,10 @@ func do_movement(delta):
 					velocity.x = -wall_jump_speed
 					print("right wall -> ", velocity)
 				velocity.y += jump_power
-	elif want_to_jump && jump_allowed:
+				time_since_jump = 0
+	elif jump && jump_allowed:
 		velocity.y += jump_power
-		want_to_jump = false
+		time_since_jump = 0
 		time_since_contact = jump_grace_period_in_seconds
 	
 	$Camera2D/is_jump_allowed.color = Color.red if jump_allowed else Color.white
