@@ -5,11 +5,9 @@ const spawn = Vector2(500, 250)
 
 var id
 var color: Color setget set_color
-var health = 1.0
+var health = 1.0 setget set_health
 var hand_item = HandItem.new(0.1, 50, PI / 4)
 var gun_item = Item.new(0.03)
-
-signal health_changed(player, new_health)
 
 func _ready():
 	rset_config("position", MultiplayerAPI.RPC_MODE_REMOTESYNC)
@@ -168,6 +166,11 @@ func get_colliding_wall():
 func set_color(_color: Color):
 	color = _color
 	$sprite.modulate = color
+	
+func set_health(value: float):
+	print("SET HEALTH")
+	health = value
+	$Camera2D/HealthBackground/Health.rect_scale = Vector2(health, 1.0)
 
 remotesync func spawn_projectile(position, direction, name):
 	var projectile = preload("res://examples/physics_projectile/physics_projectile.tscn").instance()
@@ -205,22 +208,19 @@ remotesync func hit(element):
 	elif typeof(element) == TYPE_INT:
 		var others = get_tree().get_nodes_in_group("players")
 		for other in others:
-			print(other.id)
-			print(element)
 			if other.id == element:
 				receive_damage(other)
 				break
 			
 func receive_damage(element):
-	health -= element.get_active_item().get_damage()
-	emit_signal("health_changed", self, health)
+	self.health -= element.get_active_item().get_damage()
 	if health <= 0:
 		rpc("die_and_respawn", self)
 			
 remotesync func die_and_respawn(player: Player):
 	if (player == self):
 		print("Player died")
-		health = 1.0
+		self.health = 1.0
 		position = spawn
 		velocity = Vector2(0, 0)
 		rset_unreliable("position", position)
