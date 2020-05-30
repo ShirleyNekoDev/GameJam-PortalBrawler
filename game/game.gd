@@ -84,3 +84,7 @@ remotesync func unregister_player(player_id: int):
 func update_health(health):
 	if health >= 0:
 		$CanvasLayer/HealthbarBackground/Healthbar.rect_scale = Vector2(health, 1)
+
+func _on_BottomlessPit_body_entered(body):
+	if body.is_in_group("players"):
+		body.die_and_respawn()
