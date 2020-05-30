@@ -123,15 +123,14 @@ remotesync func hit(element: Node):
 		if health <= 0:
 			pass
 			
-func die_and_respawn():
-	rpc("player_died", self)
-	health = 1.0
-	position = Vector2(100, 0)
-	velocity = Vector2(0, 0)
-	rset_unreliable("position", position)
-	
-remotesync func player_died():
-	pass
+remotesync func die_and_respawn(player: Player):
+	print("Dieeee")
+	if (player == self):
+		print("Die")
+		health = 1.0
+		position = Vector2(100, 0)
+		velocity = Vector2(0, 0)
+		rset_unreliable("position", position)
 
 remotesync func kill():
 	hide()

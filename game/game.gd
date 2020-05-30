@@ -87,4 +87,5 @@ func update_health(health):
 
 func _on_BottomlessPit_body_entered(body):
 	if body.is_in_group("players"):
-		body.die_and_respawn()
+		print("Hit")
+		body.rpc("die_and_respawn", body)
