@@ -2,6 +2,7 @@ extends RigidBody2D
 
 var direction: Vector2
 var owned_by: Node2D
+var item: Item
 const speed = 500
 
 #puppet var override_position: Vector2
@@ -43,3 +44,6 @@ func _integrate_forces(state: Physics2DDirectBodyState):
 	#	state.transform = Transform2D(override_rotation, override_position)
 	#	state.angular_velocity = override_angular_velocity
 	#	state.linear_velocity = override_linear_velocity
+
+func get_active_item():
+	return item

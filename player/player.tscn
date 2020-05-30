@@ -19,7 +19,6 @@ texture = ExtResource( 2 )
 shape = SubResource( 1 )
 
 [node name="Camera2D" type="Camera2D" parent="."]
-current = true
 
 [node name="is_jump_allowed" type="ColorRect" parent="Camera2D"]
 visible = false

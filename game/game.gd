@@ -17,10 +17,11 @@ func _ready():
 		peer.create_server(port, max_players)
 		get_tree().connect("network_peer_connected", self, "server_player_connected")
 		get_tree().connect("network_peer_disconnected", self, "server_player_disconnected")
-		if not is_dedicated:
-			register_player(1, null, {})
 	
 	get_tree().set_network_peer(peer)
+	
+	if not is_client and not is_dedicated:
+		register_player(1, null, {})
 
 func client_note_disconnected():
 	print("Server disconnected from player, exiting ...")
@@ -80,10 +81,6 @@ remote func register_player(player_id: int, position, state: Dictionary):
 
 remotesync func unregister_player(player_id: int):
 	remove_child(get_node(String(player_id)))
-	
-func update_health(health):
-	if health >= 0:
-		$CanvasLayer/HealthbarBackground/Healthbar.rect_scale = Vector2(health, 1)
 
 func _on_BottomlessPit_body_entered(body):
 	if body.is_in_group("players"):

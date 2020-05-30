@@ -9,12 +9,24 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Item",
+"class": "HandItem",
+"language": "GDScript",
+"path": "res://items/HandItem.gd"
+}, {
+"base": "Object",
+"class": "Item",
+"language": "GDScript",
+"path": "res://items/Item.gd"
+}, {
 "base": "KinematicBody2D",
 "class": "Player",
 "language": "GDScript",
 "path": "res://player/player.gd"
 } ]
 _global_script_class_icons={
+"HandItem": "",
+"Item": "",
 "Player": ""
 }
 

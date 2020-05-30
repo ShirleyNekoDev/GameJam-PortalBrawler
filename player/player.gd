@@ -6,15 +6,17 @@ const spawn = Vector2(500, 250)
 var id
 var color: Color setget set_color
 var health = 1.0
+var hand_item = HandItem.new(0.1, 50, PI / 4)
+var gun_item = Item.new(0.03)
 
-signal health_changed(new_health)
+signal health_changed(player, new_health)
 
 func _ready():
 	rset_config("position", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	set_process(true)
 	randomize()
 	position = spawn
-	
+	$Camera2D.current = is_network_master()
 	
 	# pick our color, even though this will be called on all clients, everyone
 	# else's random picks will be overriden by the first sync_state from the master
@@ -33,11 +35,18 @@ func _process(delta):
 	if is_network_master():
 		if Input.is_action_just_pressed("ui_accept"):
 			rpc("spawn_box", position)
-		if Input.is_mouse_button_pressed(BUTTON_LEFT):
-			var direction = -(get_viewport().size / 2 - get_viewport().get_mouse_position()).normalized()
-			rpc("spawn_projectile", position, direction, Uuid.v4())
+		if Input.is_mouse_button_pressed(BUTTON_RIGHT):
+			rpc("spawn_projectile", position, get_mouse_direction(), Uuid.v4())
 		
 		do_movement(delta)
+
+func _input(event):
+	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT and event.pressed:
+		print("Hand")
+		do_hit(position, get_mouse_direction(), Uuid.v4())
+		
+func get_mouse_direction():
+	return -(get_viewport().size / 2 - get_viewport().get_mouse_position()).normalized()
 
 const gravity_acceleration = 2000
 const max_speed = 1000
@@ -167,22 +176,46 @@ remotesync func spawn_projectile(position, direction, name):
 	projectile.position = position
 	projectile.direction = direction
 	projectile.owned_by = self
+	projectile.item = gun_item
 	get_parent().add_child(projectile)
 	return projectile
+	
+func do_hit(position, direction: Vector2, name):
+	var all = get_tree().get_nodes_in_group("players")
+	for player in all:
+		if player != self:
+			var distance = position.distance_to(player.position)
+			var vector_hit = (position - player.position).normalized()
+			var angle = abs(direction.angle_to(vector_hit))
+			if distance < hand_item.get_radius() and angle < hand_item.get_allowed_angle():
+				rpc("hit", player.id)
 
 remotesync func spawn_box(position):
 	var box = preload("res://examples/block/block.tscn").instance()
 	box.position = position
 	get_parent().add_child(box)
 	
-remotesync func hit(element: Node):
-	print("health loss")
-	if element.is_in_group("projectiles"):
-		health -= element.get_damage()
-		emit_signal("health_changed", health)
+func get_active_item():
+	return hand_item
+	
+remotesync func hit(element):
+	if element is Node and element.is_in_group("projectiles"):
+		receive_damage(element)
 		element.queue_free()
-		if health <= 0:
-			pass
+	elif typeof(element) == TYPE_INT:
+		var others = get_tree().get_nodes_in_group("players")
+		for other in others:
+			print(other.id)
+			print(element)
+			if other.id == element:
+				receive_damage(other)
+				break
+			
+func receive_damage(element):
+	health -= element.get_active_item().get_damage()
+	emit_signal("health_changed", self, health)
+	if health <= 0:
+		rpc("die_and_respawn", self)
 			
 remotesync func die_and_respawn(player: Player):
 	if (player == self):
