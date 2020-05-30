@@ -45,10 +45,10 @@ const speed = 350
 const air_acceleration = 200
 const wall_jump_speed = 200
 const wall_sliding_speed = 150
-const jump_power = -700
+const jump_power = -1000
 
 var velocity = Vector2(0, 0)
-var jump_allowed = false
+var jump_allowed = 2
 var dropping = false
 
 var time_since_contact = 0
@@ -65,9 +65,9 @@ enum Move {
 
 func do_movement(delta):
 	time_since_contact += delta
-	jump_allowed = false
 #	
 	var move = Move.NOT
+	var jump = false
 	
 	if time_since_contact > jump_lockout_period_in_seconds || is_on_floor() || is_on_wall():
 		if Input.is_action_pressed("action_left"):
@@ -78,8 +78,7 @@ func do_movement(delta):
 			move = Move.NOT
 		if Input.is_action_just_pressed("action_down"):
 			move = Move.DROP
-	
-	var jump = Input.is_action_pressed("action_jump")
+		jump = Input.is_action_pressed("action_jump")
 		
 	if move == Move.LEFT && !dropping:
 		if is_on_floor():
@@ -96,13 +95,15 @@ func do_movement(delta):
 			velocity.x = 0
 	elif move == Move.DROP && !is_on_floor():
 		velocity.x = 0
-		velocity.y -= jump_power
+		velocity.y = -jump_power
+		jump_allowed = 0
 		dropping = true
 	
 	if is_on_floor():
 		velocity.y = 0
 		time_since_contact = 0
 		dropping = false
+		jump_allowed = 2
 		if abs(velocity.x) > speed:
 			var slowing = (abs(velocity.x) - speed) * 2 * delta
 			print(velocity.x, " ", speed, " ", slowing)
@@ -111,14 +112,15 @@ func do_movement(delta):
 		# gravity
 		velocity.y += gravity_acceleration * delta
 	
-	if time_since_contact < jump_grace_period_in_seconds:
-		jump_allowed = true
+	if time_since_contact > jump_grace_period_in_seconds && jump_allowed == 2:
+		jump_allowed = 1
 	
 	if is_on_ceiling():
 		velocity.y = max(0, velocity.y)
 	
 	if is_on_wall():
 		time_since_contact = 0
+		jump_allowed = 2
 		if !dropping:
 			velocity.y = wall_sliding_speed
 			if jump:
@@ -129,10 +131,12 @@ func do_movement(delta):
 				else:
 					velocity.x = -wall_jump_speed
 					print("right wall -> ", velocity)
-				velocity.y += jump_power
+				velocity.y = jump_power
+				jump_allowed -=1
 				time_since_jump = 0
 	elif jump && jump_allowed:
-		velocity.y += jump_power
+		velocity.y = jump_power
+		jump_allowed -=1
 		time_since_jump = 0
 		time_since_contact = jump_grace_period_in_seconds
 	
