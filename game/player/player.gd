@@ -7,10 +7,20 @@ var id
 var color: Color setget set_color
 var health = 1.0 setget set_health
 var direction setget set_direction
-var hand_item = HandItem.new(0.1, 50, PI / 4)
-var gun_item = Item.new(0.03)
+var hand_item: HandItem
+var gun_item: Item
 
 func _ready():
+	hand_item = HandItem.new()
+	hand_item.damage = 0.1
+	hand_item.knockback_user = 10
+	hand_item.knockback_enemy = 100
+	hand_item.radius = 70
+	hand_item.allowed_angle = PI / 4
+	gun_item = Item.new()
+	gun_item.damage = 0.05
+	gun_item.knockback_user = 10
+	gun_item.knockback_enemy = 20
 	rset_config("position", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	rset_config("health", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	rset_config("direction", MultiplayerAPI.RPC_MODE_REMOTESYNC)
@@ -67,6 +77,8 @@ var time_since_contact = 0
 var time_since_jump = 0
 const jump_grace_period_in_seconds = 0.1
 const jump_lockout_period_in_seconds = 0.1
+
+var knockback = Vector2(0, 0)
 
 enum Move {
 	LEFT,
@@ -205,13 +217,14 @@ remotesync func spawn_projectile(position, direction, name):
 	
 func do_hit(position, direction: Vector2, name):
 	$Camera2D/Direction.do_hit()
+	knockback = -direction * get_active_item().knockback_user
 	var all = get_tree().get_nodes_in_group("players")
 	for enemy in all:
 		if enemy != self:
 			var distance = position.distance_to(enemy.position)
 			var vector_hit = (enemy.position - position).normalized()
 			var angle = abs(direction.angle_to(vector_hit))
-			if distance < hand_item.get_radius() and angle < hand_item.get_allowed_angle():
+			if distance < hand_item.radius and angle < hand_item.allowed_angle:
 				rpc("hit_player", enemy.id)
 				
 remotesync func hit_player(enemyid):
@@ -243,7 +256,7 @@ remotesync func hit_by_environment(environment: Node):
 	receive_damage(environment)
 			
 func receive_damage(element):
-	rset("health", health - element.get_active_item().get_damage())
+	rset("health", health - element.get_active_item().damage)
 	if health <= 0:
 		rpc("die_and_respawn", self)
 
