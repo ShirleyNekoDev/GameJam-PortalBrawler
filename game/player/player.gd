@@ -12,14 +12,14 @@ var gun_item: Item
 func _ready():
 	hand_item = HandItem.new()
 	hand_item.damage = 0.1
-	hand_item.knockback_user = 10
-	hand_item.knockback_enemy = 100
+	hand_item.knockback_user = 100
+	hand_item.knockback_enemy = 500
 	hand_item.radius = 70
 	hand_item.allowed_angle = PI / 4
 	gun_item = Item.new()
 	gun_item.damage = 0.05
-	gun_item.knockback_user = 10
-	gun_item.knockback_enemy = 20
+	gun_item.knockback_user = 40
+	gun_item.knockback_enemy = 80
 	rset_config("position", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	rset_config("health", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	rset_config("direction", MultiplayerAPI.RPC_MODE_REMOTESYNC)
@@ -30,7 +30,6 @@ func _ready():
 	
 	for player in get_tree().get_nodes_in_group("players"):
 		if player != self:
-			print("asdasd")
 			on_new_enemy(player)
 	
 	# pick our color, even though this will be called on all clients, everyone
@@ -88,8 +87,6 @@ var time_since_contact = 0
 var time_since_jump = 0
 const jump_grace_period_in_seconds = 0.1
 const jump_lockout_period_in_seconds = 0.1
-
-var knockback = Vector2(0, 0)
 
 enum Move {
 	LEFT,
@@ -190,9 +187,8 @@ func do_movement(delta):
 	if velocity.length() > max_speed:
 		velocity = velocity.normalized() * max_speed
 	
-	if knockback.length() > 0:
-		external_force += knockback
-		knockback = Vector2(0, 0)
+	#if knockback.length() > 0:
+	#	external_force += knockback
 	
 	move_and_slide(velocity, Vector2(0, -1))
 	rset_unreliable("position", position)
@@ -227,11 +223,12 @@ remotesync func spawn_projectile(position, direction, name):
 	projectile.owned_by = self
 	projectile.item = gun_item
 	get_parent().add_child(projectile)
+	knockback(-direction * gun_item.knockback_user)
 	return projectile
 	
 func do_hit(position, direction: Vector2, name):
 	$Camera2D/Direction.do_hit()
-	knockback = -direction * get_active_item().knockback_user * 20 # TODO: change value
+	knockback(-direction * get_active_item().knockback_user)
 	var all = get_tree().get_nodes_in_group("players")
 	for enemy in all:
 		if enemy != self:
@@ -260,19 +257,24 @@ func get_player_with_id(id):
 			return player
 	return null
 	
-remotesync func hit_by_projectile(projectile: Node):
-	receive_damage(projectile)
+remotesync func hit_by_projectile(projectile: Node2D):
+	receive_damage(projectile, projectile.position.direction_to(position))
 		
 func hit_by_player(enemy: Player):
-	receive_damage(enemy)
+	receive_damage(enemy, enemy.position.direction_to(position))
 			
 remotesync func hit_by_environment(environment: Node):
-	receive_damage(environment)
+	receive_damage(environment, Vector2(1, 0))
 			
-func receive_damage(element):
+func receive_damage(element, direction):
 	rset("health", health - element.get_active_item().damage)
+	knockback(direction * element.get_active_item().knockback_enemy)
 	if health <= 0:
 		rpc("die_and_respawn", self)
+		
+func knockback(force: Vector2):
+	if external_force.length() < force.length():
+		external_force += force
 
 remotesync func die_and_respawn(player: Player):
 	if (player == self):
