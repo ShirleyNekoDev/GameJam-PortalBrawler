@@ -206,13 +206,18 @@ remotesync func spawn_projectile(position, direction, name):
 func do_hit(position, direction: Vector2, name):
 	$Camera2D/Direction.do_hit()
 	var all = get_tree().get_nodes_in_group("players")
-	for player in all:
-		if player != self:
-			var distance = position.distance_to(player.position)
-			var vector_hit = (position - player.position).normalized()
+	for enemy in all:
+		if enemy != self:
+			var distance = position.distance_to(enemy.position)
+			var vector_hit = (enemy.position - position).normalized()
 			var angle = abs(direction.angle_to(vector_hit))
 			if distance < hand_item.get_radius() and angle < hand_item.get_allowed_angle():
-				rpc("hit_by_player", player.id)
+				rpc("hit_player", enemy.id)
+				
+remotesync func hit_player(enemyid):
+	var enemy = get_player_with_id(enemyid)
+	if enemy:
+		enemy.hit_by_player(self)
 
 remotesync func spawn_box(position):
 	var box = preload("res://examples/block/block.tscn").instance()
@@ -222,15 +227,17 @@ remotesync func spawn_box(position):
 func get_active_item():
 	return hand_item
 	
+func get_player_with_id(id):
+	for player in get_tree().get_nodes_in_group("players"):
+		if player.id == id:
+			return player
+	return null
+	
 remotesync func hit_by_projectile(projectile: Node):
 	receive_damage(projectile)
 		
-remotesync func hit_by_player(playerid):
-	var players = get_tree().get_nodes_in_group("players")
-	for player in players:
-		if player.id == playerid:
-			receive_damage(player)
-			break
+func hit_by_player(enemy: Player):
+	receive_damage(enemy)
 			
 remotesync func hit_by_environment(environment: Node):
 	receive_damage(environment)
