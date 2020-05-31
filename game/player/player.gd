@@ -80,6 +80,7 @@ const wall_sliding_speed = 150
 const jump_power = -800
 
 var velocity = Vector2(0, 0)
+var external_force = Vector2(0, 0)
 var jump_allowed = 2
 var dropping = false
 
@@ -183,8 +184,15 @@ func do_movement(delta):
 	$Camera2D/is_drop_allowed.color = Color.red if dropping else Color.white
 	$Camera2D/is_touching.color = Color.red if time_since_contact < jump_grace_period_in_seconds else Color.white
 	
+	velocity += external_force
+	external_force *= 0.9 # TODO: dampen factor
+	
 	if velocity.length() > max_speed:
 		velocity = velocity.normalized() * max_speed
+	
+	if knockback.length() > 0:
+		external_force += knockback
+		knockback = Vector2(0, 0)
 	
 	move_and_slide(velocity, Vector2(0, -1))
 	rset_unreliable("position", position)
@@ -223,7 +231,7 @@ remotesync func spawn_projectile(position, direction, name):
 	
 func do_hit(position, direction: Vector2, name):
 	$Camera2D/Direction.do_hit()
-	knockback = -direction * get_active_item().knockback_user
+	knockback = -direction * get_active_item().knockback_user * 20 # TODO: change value
 	var all = get_tree().get_nodes_in_group("players")
 	for enemy in all:
 		if enemy != self:
