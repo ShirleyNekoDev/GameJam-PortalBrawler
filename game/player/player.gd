@@ -9,20 +9,33 @@ var direction setget set_direction
 var hand_item: HandItem
 var gun_item: Item
 
+var last_gun_usage = 0
+var last_hand_usage = 0
+
+var deaths = 0 setget set_deaths
+var kills = 0 setget set_kills
+
 func _ready():
 	hand_item = HandItem.new()
 	hand_item.damage = 0.1
-	hand_item.knockback_user = 100
+	hand_item.knockback_user = 70
 	hand_item.knockback_enemy = 500
-	hand_item.radius = 70
+	hand_item.radius = 120
 	hand_item.allowed_angle = PI / 4
+	hand_item.reset_time = 400
+	hand_item.owner = self
 	gun_item = Item.new()
 	gun_item.damage = 0.05
-	gun_item.knockback_user = 40
+	gun_item.knockback_user = 20
 	gun_item.knockback_enemy = 80
+	gun_item.reset_time = 100
+	gun_item.owner = self
 	rset_config("position", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	rset_config("health", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	rset_config("direction", MultiplayerAPI.RPC_MODE_REMOTESYNC)
+	rset_config("external_force", MultiplayerAPI.RPC_MODE_REMOTESYNC)
+	rset_config("kills", MultiplayerAPI.RPC_MODE_REMOTESYNC)
+	rset_config("deaths", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	set_process(true)
 	randomize()
 	position = spawn
@@ -31,6 +44,12 @@ func _ready():
 	for player in get_tree().get_nodes_in_group("players"):
 		if player != self:
 			on_new_enemy(player)
+			
+	if is_network_master():
+		$Camera2D/Kills.show()
+		$Camera2D/KillsLabel.show()
+		$Camera2D/Deaths.show()
+		$Camera2D/DeathsLabel.show()
 	
 	# pick our color, even though this will be called on all clients, everyone
 	# else's random picks will be overriden by the first sync_state from the master
@@ -44,7 +63,7 @@ func on_new_enemy(enemy: Player):
 
 func get_sync_state():
 	# place all synced properties in here
-	var properties = ['color', 'health']
+	var properties = ['color', 'health', 'kills', 'deaths']
 	
 	var state = {}
 	for p in properties:
@@ -56,14 +75,16 @@ func _process(delta):
 		if Input.is_action_just_pressed("ui_accept"):
 			rpc("spawn_box", position)
 		if Input.is_mouse_button_pressed(BUTTON_RIGHT):
-			rpc("spawn_projectile", position, get_mouse_direction(), Uuid.v4())
+			if OS.get_ticks_msec() - last_gun_usage > gun_item.reset_time:
+				rpc("spawn_projectile", position, get_mouse_direction(), Uuid.v4())
 		
 		do_movement(delta)
 
 func _input(event):
 	if is_network_master():
 		if event is InputEventMouseButton and event.button_index == BUTTON_LEFT and event.pressed:
-			do_hit(position, get_mouse_direction(), Uuid.v4())
+			if OS.get_ticks_msec() - last_hand_usage > hand_item.reset_time:
+				do_hit(position, get_mouse_direction(), Uuid.v4())
 		if event is InputEventMouseMotion:
 			rset_unreliable("direction", get_mouse_direction())
 		
@@ -215,6 +236,7 @@ func set_direction(value: Vector2):
 	$Camera2D/Direction.set_direction(direction)
 
 remotesync func spawn_projectile(position, direction, name):
+	last_gun_usage = OS.get_ticks_msec()
 	var projectile = preload("res://game/physics_projectile/physics_projectile.tscn").instance()
 	projectile.set_network_master(1)
 	projectile.name = name
@@ -227,6 +249,7 @@ remotesync func spawn_projectile(position, direction, name):
 	return projectile
 	
 func do_hit(position, direction: Vector2, name):
+	last_hand_usage = OS.get_ticks_msec()
 	$Camera2D/Direction.do_hit()
 	knockback(-direction * get_active_item().knockback_user)
 	var all = get_tree().get_nodes_in_group("players")
@@ -270,19 +293,34 @@ func receive_damage(element, direction):
 	rset("health", health - element.get_active_item().damage)
 	knockback(direction * element.get_active_item().knockback_enemy)
 	if health <= 0:
+		if element.get_active_item().owner:
+			element.get_active_item().owner.enemy_killed()
 		rpc("die_and_respawn", self)
 		
 func knockback(force: Vector2):
 	if external_force.length() < force.length():
-		external_force += force
+		rset("external_force", external_force + force)
 
 remotesync func die_and_respawn(player: Player):
 	if (player == self):
 		print("Player died")
 		rset("health", 1.0)
+		rset("external_force", 0.0)
 		position = spawn
 		velocity = Vector2(0, 0)
 		rset_unreliable("position", position)
+		rset("deaths", deaths + 1)
 
+func enemy_killed():
+	rset("kills", kills + 1)
+	
+func set_deaths(value):
+	deaths = value
+	$Camera2D/Deaths.text = String(deaths)
+	
+func set_kills(value):
+	kills = value
+	$Camera2D/Kills.text = String(kills)
+		
 remotesync func kill():
 	hide()

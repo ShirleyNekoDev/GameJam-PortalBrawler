@@ -1,7 +1,9 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=12 format=2]
 
+[ext_resource path="res://Roboto_242.tres" type="DynamicFont" id=1]
 [ext_resource path="res://game/player/player.gd" type="Script" id=2]
 [ext_resource path="res://game/player/Direction.gd" type="Script" id=3]
+[ext_resource path="res://Roboto_52.tres" type="DynamicFont" id=4]
 
 [sub_resource type="CircleShape2D" id=5]
 radius = 20.0
@@ -84,6 +86,62 @@ mesh = SubResource( 2 )
 texture = SubResource( 3 )
 normal_map = SubResource( 4 )
 script = ExtResource( 3 )
+
+[node name="Kills" type="Label" parent="Camera2D"]
+visible = false
+margin_left = 819.766
+margin_top = 264.0
+margin_right = 1019.77
+margin_bottom = 549.0
+custom_fonts/font = ExtResource( 1 )
+text = "0"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="KillsLabel" type="Label" parent="Camera2D"]
+visible = false
+margin_left = 819.766
+margin_top = 496.0
+margin_right = 1019.77
+margin_bottom = 579.0
+custom_fonts/font = ExtResource( 4 )
+text = "Kills"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Deaths" type="Label" parent="Camera2D"]
+visible = false
+margin_left = 819.766
+margin_top = -54.0
+margin_right = 1019.77
+margin_bottom = 231.0
+custom_fonts/font = ExtResource( 1 )
+text = "0"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DeathsLabel" type="Label" parent="Camera2D"]
+visible = false
+margin_left = 819.766
+margin_top = 178.0
+margin_right = 1019.77
+margin_bottom = 261.0
+custom_fonts/font = ExtResource( 4 )
+text = "Deaths"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="name" type="Label" parent="."]
 visible = false
