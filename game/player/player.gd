@@ -1,7 +1,7 @@
 extends KinematicBody2D
 class_name Player
 
-const spawn = Vector2(500, 250)
+const spawn = Vector2(200, -50)
 
 var id
 var color: Color setget set_color
@@ -49,18 +49,19 @@ func get_mouse_direction():
 const gravity_acceleration = 2000
 const max_speed = 1000
 const speed = 350
-const air_acceleration = 200
-const wall_jump_speed = 200
+const air_acceleration = 50
+const jump_speed_side = 300
 const wall_sliding_speed = 150
-const jump_power = -700
+const jump_power = -800
 
 var velocity = Vector2(0, 0)
-var jump_allowed = false
-var want_to_jump = false
+var jump_allowed = 2
 var dropping = false
 
 var time_since_contact = 0
+var time_since_jump = 0
 const jump_grace_period_in_seconds = 0.1
+const jump_lockout_period_in_seconds = 0.1
 
 enum Move {
 	LEFT,
@@ -71,43 +72,46 @@ enum Move {
 
 func do_movement(delta):
 	time_since_contact += delta
-	jump_allowed = false
 #	
 	var move = Move.NOT
-	if Input.is_action_pressed("action_left"):
-		move = Move.LEFT
-	if Input.is_action_pressed("action_right"):
-		move = Move.RIGHT
-	if Input.is_action_pressed("action_left") && Input.is_action_pressed("action_right"):
-		move = Move.NOT
-	if Input.is_action_just_pressed("action_down"):
-		move = Move.DROP
+	var jump = false
 	
-	var jump = Input.is_action_just_pressed("action_jump")
-	want_to_jump = want_to_jump || jump
-	
+	if time_since_contact > jump_lockout_period_in_seconds || is_on_floor() || is_on_wall():
+		if Input.is_action_pressed("action_left"):
+			move = Move.LEFT
+		if Input.is_action_pressed("action_right"):
+			move = Move.RIGHT
+		if Input.is_action_pressed("action_left") && Input.is_action_pressed("action_right"):
+			move = Move.NOT
+		if Input.is_action_just_pressed("action_down"):
+			move = Move.DROP
+			
+	jump = Input.is_action_just_pressed("action_jump")
+		
 	if move == Move.LEFT && !dropping:
 		if is_on_floor():
 			velocity.x = min(velocity.x, -speed)
 		else:
-			velocity.x = min(0, velocity.x - air_acceleration * delta)
+			velocity.x = max(velocity.x - air_acceleration, -speed)
 	elif move == Move.RIGHT && !dropping:
 		if is_on_floor():
 			velocity.x = max(velocity.x, speed)
 		else:
-			velocity.x = max(0, velocity.x + air_acceleration * delta)
+			velocity.x = min(velocity.x + air_acceleration, speed)
 	elif move == Move.NOT:
 		if is_on_floor():
 			velocity.x = 0
 	elif move == Move.DROP && !is_on_floor():
 		velocity.x = 0
-		velocity.y -= jump_power
+		velocity.y = -jump_power
+		jump_allowed = 0
 		dropping = true
 	
 	if is_on_floor():
 		velocity.y = 0
 		time_since_contact = 0
 		dropping = false
+		jump_allowed = 2
 		if abs(velocity.x) > speed:
 			var slowing = (abs(velocity.x) - speed) * 2 * delta
 			print(velocity.x, " ", speed, " ", slowing)
@@ -116,29 +120,37 @@ func do_movement(delta):
 		# gravity
 		velocity.y += gravity_acceleration * delta
 	
-	if time_since_contact < jump_grace_period_in_seconds:
-		jump_allowed = true
+	if time_since_contact > jump_grace_period_in_seconds && jump_allowed == 2:
+		jump_allowed = 1
 	
 	if is_on_ceiling():
 		velocity.y = max(0, velocity.y)
 	
 	if is_on_wall():
 		time_since_contact = 0
+		jump_allowed = 2
 		if !dropping:
 			velocity.y = wall_sliding_speed
 			if jump:
 				var side = get_colliding_wall()
 				if side == Wall.LEFT:
-					velocity.x = wall_jump_speed
+					velocity.x = jump_speed_side + speed
 					print("left wall -> ", velocity)
 				else:
-					velocity.x = -wall_jump_speed
+					velocity.x = -(jump_speed_side + speed)
 					print("right wall -> ", velocity)
-				velocity.y += jump_power
-	elif want_to_jump && jump_allowed:
-		velocity.y += jump_power
-		want_to_jump = false
-		time_since_contact = jump_grace_period_in_seconds
+				velocity.y = jump_power
+				jump_allowed -=1
+				time_since_jump = 0
+	elif jump && jump_allowed:
+		var side = get_colliding_wall()
+		if move == Move.LEFT:
+			velocity.x -= jump_speed_side
+		if move == Move.RIGHT:
+			velocity.x += jump_speed_side
+		velocity.y = jump_power
+		jump_allowed -=1
+		time_since_jump = 0
 	
 	$Camera2D/is_jump_allowed.color = Color.red if jump_allowed else Color.white
 	$Camera2D/is_drop_allowed.color = Color.red if dropping else Color.white
@@ -173,7 +185,7 @@ func set_health(value: float):
 	$Camera2D/HealthBackground/Health.rect_scale = Vector2(health, 1.0)
 
 remotesync func spawn_projectile(position, direction, name):
-	var projectile = preload("res://examples/physics_projectile/physics_projectile.tscn").instance()
+	var projectile = preload("res://game/physics_projectile/physics_projectile.tscn").instance()
 	projectile.set_network_master(1)
 	projectile.name = name
 	projectile.position = position
@@ -191,7 +203,7 @@ func do_hit(position, direction: Vector2, name):
 			var vector_hit = (position - player.position).normalized()
 			var angle = abs(direction.angle_to(vector_hit))
 			if distance < hand_item.get_radius() and angle < hand_item.get_allowed_angle():
-				rpc("hit", player.id)
+				rpc("hit_by_player", player.id)
 
 remotesync func spawn_box(position):
 	var box = preload("res://examples/block/block.tscn").instance()
@@ -201,22 +213,24 @@ remotesync func spawn_box(position):
 func get_active_item():
 	return hand_item
 	
-remotesync func hit(element):
-	if element is Node and element.is_in_group("projectiles"):
-		receive_damage(element)
-		element.queue_free()
-	elif typeof(element) == TYPE_INT:
-		var others = get_tree().get_nodes_in_group("players")
-		for other in others:
-			if other.id == element:
-				receive_damage(other)
-				break
+remotesync func hit_by_projectile(projectile: Node):
+	receive_damage(projectile)
+		
+remotesync func hit_by_player(playerid):
+	var players = get_tree().get_nodes_in_group("players")
+	for player in players:
+		if player.id == playerid:
+			receive_damage(player)
+			break
+			
+remotesync func hit_by_environment(environment: Node):
+	receive_damage(environment)
 			
 func receive_damage(element):
 	self.health -= element.get_active_item().get_damage()
 	if health <= 0:
 		rpc("die_and_respawn", self)
-			
+
 remotesync func die_and_respawn(player: Player):
 	if (player == self):
 		print("Player died")

@@ -12,17 +12,17 @@ _global_script_classes=[ {
 "base": "Item",
 "class": "HandItem",
 "language": "GDScript",
-"path": "res://items/HandItem.gd"
+"path": "res://game/items/HandItem.gd"
 }, {
 "base": "Object",
 "class": "Item",
 "language": "GDScript",
-"path": "res://items/Item.gd"
+"path": "res://game/items/Item.gd"
 }, {
 "base": "KinematicBody2D",
 "class": "Player",
 "language": "GDScript",
-"path": "res://player/player.gd"
+"path": "res://game/player/player.gd"
 } ]
 _global_script_class_icons={
 "HandItem": "",

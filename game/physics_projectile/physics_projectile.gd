@@ -29,16 +29,16 @@ remotesync func kill():
 
 func _integrate_forces(state: Physics2DDirectBodyState):
 	if is_network_master():
+		for i in range(state.get_contact_count()):
+			var body = state.get_contact_collider_object(i)
+			if body:
+				_on_projectile_body_entered(body)
+	
 		#rset_unreliable("override_position", state.transform.get_origin())
 		#rset_unreliable("override_rotation", state.transform.get_rotation())
 		#rset_unreliable("override_angular_velocity", state.angular_velocity)
 		#rset_unreliable("override_linear_velocity", state.linear_velocity)
 		#rset_unreliable("has_overrides", true)
-		
-		for i in range(state.get_contact_count()):
-			var body = state.get_contact_collider_object(i)
-			if body and body != owned_by and body.is_in_group("players"):
-				body.rpc("hit", self)
 	#elif has_overrides:, 
 	#	has_overrides = false
 	#	state.transform = Transform2D(override_rotation, override_position)
@@ -47,3 +47,8 @@ func _integrate_forces(state: Physics2DDirectBodyState):
 
 func get_active_item():
 	return item
+
+func _on_projectile_body_entered(body):
+	if body.is_in_group("players") && body != owned_by:
+		body.rpc("hit_by_projectile", self)
+		queue_free()

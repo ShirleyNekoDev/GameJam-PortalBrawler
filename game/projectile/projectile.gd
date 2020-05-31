@@ -16,9 +16,9 @@ func _physics_process(delta):
 	position += direction * speed
 
 func _on_projectile_body_entered(body):
-	print("Hit")
-	if is_network_master() and body != owned_by:
-		body.rpc("hit", self)
+	if is_network_master():
+		if body != owned_by:
+			body.rpc("hit_by_environment", self)
 
-func get_damage():
-	return 0.1
+func get_active_item():
+	return Item.new(0.2)

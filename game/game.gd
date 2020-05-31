@@ -64,7 +64,7 @@ remote func spawn_object(name: String, filename: String, position: Vector2, stat
 	return object
 
 remote func register_player(player_id: int, position, state: Dictionary):
-	var player: Node2D = preload("res://player/player.tscn").instance()
+	var player: Node2D = preload("res://game/player/player.tscn").instance()
 	player.id = player_id
 	player.set_network_master(player.id)
 	player.name = String(player.id)
