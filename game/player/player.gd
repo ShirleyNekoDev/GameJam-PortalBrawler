@@ -11,6 +11,7 @@ var gun_item = Item.new(0.03)
 
 func _ready():
 	rset_config("position", MultiplayerAPI.RPC_MODE_REMOTESYNC)
+	rset_config("health", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	set_process(true)
 	randomize()
 	position = spawn
@@ -180,7 +181,6 @@ func set_color(_color: Color):
 	$sprite.modulate = color
 	
 func set_health(value: float):
-	print("SET HEALTH")
 	health = value
 	$Camera2D/HealthBackground/Health.rect_scale = Vector2(health, 1.0)
 
@@ -227,14 +227,14 @@ remotesync func hit_by_environment(environment: Node):
 	receive_damage(environment)
 			
 func receive_damage(element):
-	self.health -= element.get_active_item().get_damage()
+	rset("health", health - element.get_active_item().get_damage())
 	if health <= 0:
 		rpc("die_and_respawn", self)
 
 remotesync func die_and_respawn(player: Player):
 	if (player == self):
 		print("Player died")
-		self.health = 1.0
+		rset("health", 1.0)
 		position = spawn
 		velocity = Vector2(0, 0)
 		rset_unreliable("position", position)
