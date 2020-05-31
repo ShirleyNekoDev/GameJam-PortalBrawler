@@ -68,6 +68,8 @@ remote func register_player(player_id: int, position, state: Dictionary):
 	player.id = player_id
 	player.set_network_master(player.id)
 	player.name = String(player.id)
+	for enemy in get_tree().get_nodes_in_group("players"):
+		enemy.on_new_enemy(player)
 	player.add_to_group("players")
 	
 	add_child(player)
@@ -77,6 +79,7 @@ remote func register_player(player_id: int, position, state: Dictionary):
 		player.position = position
 	for property in state:
 		player.set(property, state[property])
+		
 	return player
 
 remotesync func unregister_player(player_id: int):

@@ -4,7 +4,6 @@ class_name Player
 const spawn = Vector2(200, -50)
 
 var id
-var color: Color setget set_color
 var health = 1.0 setget set_health
 var direction setget set_direction
 var hand_item: HandItem
@@ -29,9 +28,20 @@ func _ready():
 	position = spawn
 	$Camera2D.current = is_network_master()
 	
+	for player in get_tree().get_nodes_in_group("players"):
+		if player != self:
+			print("asdasd")
+			on_new_enemy(player)
+	
 	# pick our color, even though this will be called on all clients, everyone
 	# else's random picks will be overriden by the first sync_state from the master
-	set_color(Color.from_hsv(randf(), 1, 1))
+	#set_color(Color.from_hsv(randf(), 1, 1))
+	
+func on_new_enemy(enemy: Player):
+	if is_network_master():
+		var indicator = preload("res://game/player_indicator/PlayerIndicator.tscn").instance()
+		indicator.follow_enemy(self, enemy)
+		$Camera2D.add_child(indicator)
 
 func get_sync_state():
 	# place all synced properties in here
@@ -191,10 +201,6 @@ func get_colliding_wall():
 			return Wall.LEFT
 		elif collision.normal.x < 0:
 			return Wall.RIGHT
-
-func set_color(_color: Color):
-	color = _color
-	$sprite.modulate = color
 	
 func set_health(value: float):
 	health = value

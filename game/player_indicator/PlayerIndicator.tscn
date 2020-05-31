@@ -1,0 +1,17 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://game/player_indicator/PlayerIndicator.gd" type="Script" id=1]
+
+[sub_resource type="PrismMesh" id=1]
+
+[sub_resource type="MeshTexture" id=2]
+
+[sub_resource type="MeshTexture" id=3]
+
+[node name="Node2D" type="MeshInstance2D"]
+rotation = -1.5708
+scale = Vector2( 15, 12.99 )
+mesh = SubResource( 1 )
+texture = SubResource( 2 )
+normal_map = SubResource( 3 )
+script = ExtResource( 1 )

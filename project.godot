@@ -23,11 +23,17 @@ _global_script_classes=[ {
 "class": "Player",
 "language": "GDScript",
 "path": "res://game/player/player.gd"
+}, {
+"base": "MeshInstance2D",
+"class": "PlayerIndicator",
+"language": "GDScript",
+"path": "res://game/player_indicator/PlayerIndicator.gd"
 } ]
 _global_script_class_icons={
 "HandItem": "",
 "Item": "",
-"Player": ""
+"Player": "",
+"PlayerIndicator": ""
 }
 
 [application]
