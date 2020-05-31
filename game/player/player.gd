@@ -1,8 +1,6 @@
 extends KinematicBody2D
 class_name Player
 
-const spawn = Vector2(200, -50)
-
 var id
 var health = 1.0 setget set_health
 var direction setget set_direction
@@ -37,9 +35,9 @@ func _ready():
 	rset_config("kills", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	rset_config("deaths", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	set_process(true)
-	randomize()
-	position = spawn
 	$Camera2D.current = is_network_master()
+	place_at_random_spawn()
+	rset("position", position)
 	
 	for player in get_tree().get_nodes_in_group("players"):
 		if player != self:
@@ -54,6 +52,11 @@ func _ready():
 	# pick our color, even though this will be called on all clients, everyone
 	# else's random picks will be overriden by the first sync_state from the master
 	#set_color(Color.from_hsv(randf(), 1, 1))
+	
+func place_at_random_spawn():
+	var spawns = get_tree().get_nodes_in_group("spawns")
+	randomize()
+	position = spawns[rand_range(0, spawns.size())].position
 	
 func on_new_enemy(enemy: Player):
 	if is_network_master():
@@ -305,8 +308,8 @@ remotesync func die_and_respawn(player: Player):
 	if (player == self):
 		print("Player died")
 		rset("health", 1.0)
-		rset("external_force", 0.0)
-		position = spawn
+		rset("external_force", Vector2(0, 0))
+		place_at_random_spawn()
 		velocity = Vector2(0, 0)
 		rset_unreliable("position", position)
 		rset("deaths", deaths + 1)

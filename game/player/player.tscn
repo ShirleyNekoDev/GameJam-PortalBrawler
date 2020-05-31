@@ -89,9 +89,9 @@ script = ExtResource( 3 )
 
 [node name="Kills" type="Label" parent="Camera2D"]
 visible = false
-margin_left = 819.766
+margin_left = 719.46
 margin_top = 264.0
-margin_right = 1019.77
+margin_right = 1119.46
 margin_bottom = 549.0
 custom_fonts/font = ExtResource( 1 )
 text = "0"
@@ -117,9 +117,9 @@ __meta__ = {
 
 [node name="Deaths" type="Label" parent="Camera2D"]
 visible = false
-margin_left = 819.766
+margin_left = 719.46
 margin_top = -54.0
-margin_right = 1019.77
+margin_right = 1119.46
 margin_bottom = 231.0
 custom_fonts/font = ExtResource( 1 )
 text = "0"

@@ -10,6 +10,7 @@ shader = ExtResource( 4 )
 shader_param/BACKGROUND_COLOR = Color( 0, 0, 1, 1 )
 shader_param/GRID_COLOR = Color( 1, 0, 1, 1 )
 shader_param/GRID_SIZE = Vector2( 100, 100 )
+shader_param/TIME_FACTOR = 0.6
 
 [sub_resource type="QuadMesh" id=2]
 
@@ -135,4 +136,61 @@ shape = SubResource( 6 )
 [node name="MeshInstance2D" type="MeshInstance2D" parent="Level/Harm1"]
 scale = Vector2( 10, 10 )
 mesh = SubResource( 7 )
+
+[node name="Spawns" type="Node2D" parent="Level"]
+
+[node name="Spawn1" type="Node2D" parent="Level/Spawns" groups=[
+"spawns",
+]]
+position = Vector2( -613.892, -613.892 )
+
+[node name="Spawn2" type="Node2D" parent="Level/Spawns" groups=[
+"spawns",
+]]
+position = Vector2( -214.442, -605.483 )
+
+[node name="Spawn3" type="Node2D" parent="Level/Spawns" groups=[
+"spawns",
+]]
+position = Vector2( 327.97, -613.892 )
+
+[node name="Spawn4" type="Node2D" parent="Level/Spawns" groups=[
+"spawns",
+]]
+position = Vector2( 769.468, -613.892 )
+
+[node name="Spawn5" type="Node2D" parent="Level/Spawns" groups=[
+"spawns",
+]]
+position = Vector2( 975.5, -353.198 )
+
+[node name="Spawn6" type="Node2D" parent="Level/Spawns" groups=[
+"spawns",
+]]
+position = Vector2( 475.136, -323.765 )
+
+[node name="Spawn7" type="Node2D" parent="Level/Spawns" groups=[
+"spawns",
+]]
+position = Vector2( 340.584, -88.2997 )
+
+[node name="Spawn8" type="Node2D" parent="Level/Spawns" groups=[
+"spawns",
+]]
+position = Vector2( 1412.79, -248.08 )
+
+[node name="Spawn9" type="Node2D" parent="Level/Spawns" groups=[
+"spawns",
+]]
+position = Vector2( -344.789, -100.914 )
+
+[node name="Spawn10" type="Node2D" parent="Level/Spawns" groups=[
+"spawns",
+]]
+position = Vector2( -790.491, -79.89 )
+
+[node name="Spawn11" type="Node2D" parent="Level/Spawns" groups=[
+"spawns",
+]]
+position = Vector2( -1189.94, -340.584 )
 [connection signal="body_entered" from="BottomlessPit" to="." method="_on_BottomlessPit_body_entered"]
