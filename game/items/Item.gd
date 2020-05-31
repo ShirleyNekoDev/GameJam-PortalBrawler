@@ -2,9 +2,7 @@ extends Object
 class_name Item
 
 var damage
-
-func _init(damage):
-	self.damage = damage
-
-func get_damage():
-	return damage
+var knockback_user
+var knockback_enemy
+var reset_time
+var owner

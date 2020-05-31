@@ -1,11 +1,12 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=12 format=2]
 
-[ext_resource path="res://game/player/player.png" type="Texture" id=1]
+[ext_resource path="res://Roboto_242.tres" type="DynamicFont" id=1]
 [ext_resource path="res://game/player/player.gd" type="Script" id=2]
 [ext_resource path="res://game/player/Direction.gd" type="Script" id=3]
+[ext_resource path="res://Roboto_52.tres" type="DynamicFont" id=4]
 
-[sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 30.8244, 32.1765 )
+[sub_resource type="CircleShape2D" id=5]
+radius = 20.0
 
 [sub_resource type="PrismMesh" id=2]
 
@@ -13,17 +14,20 @@ extents = Vector2( 30.8244, 32.1765 )
 
 [sub_resource type="MeshTexture" id=4]
 
+[sub_resource type="SphereMesh" id=6]
+
+[sub_resource type="MeshTexture" id=7]
+
+[sub_resource type="MeshTexture" id=8]
+
 [node name="player" type="KinematicBody2D" groups=[
 "players",
 ]]
 scale = Vector2( 0.5, 0.5 )
 script = ExtResource( 2 )
 
-[node name="sprite" type="Sprite" parent="."]
-texture = ExtResource( 1 )
-
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource( 1 )
+shape = SubResource( 5 )
 
 [node name="Camera2D" type="Camera2D" parent="."]
 
@@ -83,6 +87,62 @@ texture = SubResource( 3 )
 normal_map = SubResource( 4 )
 script = ExtResource( 3 )
 
+[node name="Kills" type="Label" parent="Camera2D"]
+visible = false
+margin_left = 719.46
+margin_top = 264.0
+margin_right = 1119.46
+margin_bottom = 549.0
+custom_fonts/font = ExtResource( 1 )
+text = "0"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="KillsLabel" type="Label" parent="Camera2D"]
+visible = false
+margin_left = 819.766
+margin_top = 496.0
+margin_right = 1019.77
+margin_bottom = 579.0
+custom_fonts/font = ExtResource( 4 )
+text = "Kills"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Deaths" type="Label" parent="Camera2D"]
+visible = false
+margin_left = 719.46
+margin_top = -54.0
+margin_right = 1119.46
+margin_bottom = 231.0
+custom_fonts/font = ExtResource( 1 )
+text = "0"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DeathsLabel" type="Label" parent="Camera2D"]
+visible = false
+margin_left = 819.766
+margin_top = 178.0
+margin_right = 1019.77
+margin_bottom = 261.0
+custom_fonts/font = ExtResource( 4 )
+text = "Deaths"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="name" type="Label" parent="."]
 visible = false
 margin_left = -19.6842
@@ -96,4 +156,9 @@ valign = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
-[connection signal="set_direction" from="Camera2D/Direction" to="Camera2D/Direction" method="_on_Direction_set_direction"]
+
+[node name="mesh" type="MeshInstance2D" parent="."]
+scale = Vector2( 25, 25 )
+mesh = SubResource( 6 )
+texture = SubResource( 7 )
+normal_map = SubResource( 8 )

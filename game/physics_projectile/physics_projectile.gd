@@ -51,4 +51,7 @@ func get_active_item():
 func _on_projectile_body_entered(body):
 	if body.is_in_group("players") && body != owned_by:
 		body.rpc("hit_by_projectile", self)
-		queue_free()
+		rpc("kill_self")
+		
+remotesync func kill_self():
+	queue_free()
