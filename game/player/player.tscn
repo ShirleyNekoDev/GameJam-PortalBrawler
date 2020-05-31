@@ -1,10 +1,17 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://game/player/player.png" type="Texture" id=1]
 [ext_resource path="res://game/player/player.gd" type="Script" id=2]
+[ext_resource path="res://game/player/Direction.gd" type="Script" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 30.8244, 32.1765 )
+
+[sub_resource type="PrismMesh" id=2]
+
+[sub_resource type="MeshTexture" id=3]
+
+[sub_resource type="MeshTexture" id=4]
 
 [node name="player" type="KinematicBody2D" groups=[
 "players",
@@ -67,6 +74,15 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Direction" type="MeshInstance2D" parent="Camera2D"]
+position = Vector2( 70, 0 )
+rotation = -1.5708
+scale = Vector2( 10, 10 )
+mesh = SubResource( 2 )
+texture = SubResource( 3 )
+normal_map = SubResource( 4 )
+script = ExtResource( 3 )
+
 [node name="name" type="Label" parent="."]
 visible = false
 margin_left = -19.6842
@@ -80,3 +96,4 @@ valign = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
+[connection signal="set_direction" from="Camera2D/Direction" to="Camera2D/Direction" method="_on_Direction_set_direction"]

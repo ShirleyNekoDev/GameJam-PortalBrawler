@@ -6,12 +6,14 @@ const spawn = Vector2(200, -50)
 var id
 var color: Color setget set_color
 var health = 1.0 setget set_health
+var direction setget set_direction
 var hand_item = HandItem.new(0.1, 50, PI / 4)
 var gun_item = Item.new(0.03)
 
 func _ready():
 	rset_config("position", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	rset_config("health", MultiplayerAPI.RPC_MODE_REMOTESYNC)
+	rset_config("direction", MultiplayerAPI.RPC_MODE_REMOTESYNC)
 	set_process(true)
 	randomize()
 	position = spawn
@@ -41,8 +43,9 @@ func _process(delta):
 
 func _input(event):
 	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT and event.pressed:
-		print("Hand")
 		do_hit(position, get_mouse_direction(), Uuid.v4())
+	if event is InputEventMouseMotion:
+		rset("direction", get_mouse_direction())
 		
 func get_mouse_direction():
 	return -(get_viewport().size / 2 - get_viewport().get_mouse_position()).normalized()
@@ -183,6 +186,10 @@ func set_color(_color: Color):
 func set_health(value: float):
 	health = value
 	$Camera2D/HealthBackground/Health.rect_scale = Vector2(health, 1.0)
+	
+func set_direction(value: Vector2):
+	direction = value
+	emit_signal("set_direction", direction)
 
 remotesync func spawn_projectile(position, direction, name):
 	var projectile = preload("res://game/physics_projectile/physics_projectile.tscn").instance()
