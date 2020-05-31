@@ -189,7 +189,7 @@ func set_health(value: float):
 	
 func set_direction(value: Vector2):
 	direction = value
-	emit_signal("set_direction", direction)
+	$Camera2D/Direction.set_direction(direction)
 
 remotesync func spawn_projectile(position, direction, name):
 	var projectile = preload("res://game/physics_projectile/physics_projectile.tscn").instance()
