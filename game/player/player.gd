@@ -42,10 +42,11 @@ func _process(delta):
 		do_movement(delta)
 
 func _input(event):
-	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT and event.pressed:
-		do_hit(position, get_mouse_direction(), Uuid.v4())
-	if event is InputEventMouseMotion:
-		rset("direction", get_mouse_direction())
+	if is_network_master():
+		if event is InputEventMouseButton and event.button_index == BUTTON_LEFT and event.pressed:
+			do_hit(position, get_mouse_direction(), Uuid.v4())
+		if event is InputEventMouseMotion:
+			rset_unreliable("direction", get_mouse_direction())
 		
 func get_mouse_direction():
 	return -(get_viewport().size / 2 - get_viewport().get_mouse_position()).normalized()
