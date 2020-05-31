@@ -204,6 +204,7 @@ remotesync func spawn_projectile(position, direction, name):
 	return projectile
 	
 func do_hit(position, direction: Vector2, name):
+	$Camera2D/Direction.do_hit()
 	var all = get_tree().get_nodes_in_group("players")
 	for player in all:
 		if player != self:
